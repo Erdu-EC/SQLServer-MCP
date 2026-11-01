@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "description": "MCP server for SQL Server with query and execute tools, fully Native AOT compatible.",
+  "name": "sqlserver-mcp",
+  "version": "1.0.0",
+  "packages": [
+    {
+      "registryType": "nuget",
+      "identifier": "SqlServerMcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [],
+      "environmentVariables": [
+        {
+          "name": "SQLSERVER_CONNECTION_STRING",
+          "description": "SQL Server connection string (e.g. Server=myserver;Database=mydb;User Id=myuser;Password=mypassword;TrustServerCertificate=True;)"
+        }
+      ]
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/user/SqlServerMcp",
+    "source": "github"
+  }
+}
