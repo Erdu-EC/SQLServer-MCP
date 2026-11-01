@@ -44,7 +44,14 @@ jobs:
       - name: Publish AOT
         run: dotnet publish SQLServerMcp/SQLServerMcp.csproj -c Release -r ${{ matrix.rid }} --self-contained true -o publish/${{ matrix.rid }}
 
-      - name: Package artifact
+      - name: Package artifact (Windows)
+        if: matrix.os == 'windows-2025'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path publish/${{ matrix.rid }}/SQLServerMcp${{ matrix.ext }} -DestinationPath publish/sqlserver-mcp-${{ matrix.rid }}.zip
+
+      - name: Package artifact (Linux)
+        if: matrix.os != 'windows-2025'
         shell: bash
         run: |
           cd publish/${{ matrix.rid }}
