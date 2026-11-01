@@ -48,7 +48,7 @@ jobs:
         shell: bash
         run: |
           cd publish/${{ matrix.rid }}
-          zip -j ../sqlserver-mcp-${{ matrix.rid }}.zip sqlservermcp${{ matrix.ext }}
+          zip -j ../sqlserver-mcp-${{ matrix.rid }}.zip SQLServerMcp${{ matrix.ext }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
