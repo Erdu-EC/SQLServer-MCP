@@ -79,8 +79,9 @@ SQLSERVER_CONNECTION_STRING="Server=myserver;Database=mydb;User Id=myuser;Passwo
 
 Execute SELECT statements and return results as JSON.
 
-**Parameter:**
+**Parameters:**
 - `query` (string): The SQL SELECT statement to execute
+- `maxRows` (integer, optional): Maximum number of rows to return. Default: **100**. Use this to prevent returning millions of rows accidentally.
 
 **Example:**
 ```sql

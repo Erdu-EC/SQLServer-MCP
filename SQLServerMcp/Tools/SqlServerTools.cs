@@ -26,11 +26,15 @@ internal class SqlServerTools
         return connStr;
     }
 
+    private const int DefaultMaxRows = 100;
+
     [McpServerTool]
     [Description("Execute a read-only SQL query and return results as JSON. Use for SELECT statements.")]
     public static string Query(
         [Description("SQL SELECT query to execute")]
-        string query)
+        string query,
+        [Description("Maximum number of rows to return (default: 100)")]
+        int? maxRows = null)
     {
         using var conn = new SqlConnection(GetConnectionString());
         conn.Open();
@@ -54,11 +58,13 @@ internal class SqlServerTools
         schema?.Dispose();
 
         var columnCount = columns.Count;
+        var limit = maxRows ?? DefaultMaxRows;
         var buffer = new MemoryStream();
         using var writer = new Utf8JsonWriter(buffer, new JsonWriterOptions { Indented = false });
         writer.WriteStartArray();
 
-        while (reader.Read())
+        var count = 0;
+        while (reader.Read() && count < limit)
         {
             writer.WriteStartObject();
             for (var i = 0; i < columnCount; i++)
@@ -68,6 +74,7 @@ internal class SqlServerTools
             }
 
             writer.WriteEndObject();
+            count++;
         }
 
         writer.WriteEndArray();
