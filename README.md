@@ -1,46 +1,16 @@
 # SQL Server MCP Server
 
-A Model Context Protocol (MCP) server for SQL Server, built with C# and fully compatible with **Native AOT**.
+Connect your AI application to SQL Server using the Model Context Protocol (MCP). This server provides two tools to interact with your database: execute queries and modify data.
 
-Provides two tools: `query` for read-only SELECT statements and `execute` for data modification commands.
+## Installation
 
-## Tools
+### Option 1: Direct download (recommended)
 
-| Tool | Description |
-|------|-------------|
-| `query` | Execute a read-only SQL SELECT query and return results as JSON |
-| `execute` | Execute a SQL command (INSERT, UPDATE, DELETE, CREATE, ALTER, DROP) and return rows affected |
+1. Download the binary for your platform from [Releases](https://github.com/user/SqlServerMcp/releases)
+2. Extract the zip file
+3. Ensure the executable has execute permissions (Linux): `chmod +x SQLServerMcp`
 
-## Configuration
-
-Set the `SQLSERVER_CONNECTION_STRING` environment variable before running the server:
-
-```
-SQLSERVER_CONNECTION_STRING="Server=myserver;Database=mydb;User Id=myuser;Password=mypassword;TrustServerCertificate=True;"
-```
-
-## Developing locally
-
-```json
-{
-  "servers": {
-    "sqlserver": {
-      "type": "stdio",
-      "command": "dotnet",
-      "args": [
-        "run",
-        "--project",
-        "<PATH TO SQLServerMcp DIRECTORY>"
-      ],
-      "env": {
-        "SQLSERVER_CONNECTION_STRING": "Server=...;Database=...;User Id=...;Password=...;TrustServerCertificate=True;"
-      }
-    }
-  }
-}
-```
-
-## Using from NuGet.org
+### Option 2: NuGet
 
 ```json
 {
@@ -48,12 +18,7 @@ SQLSERVER_CONNECTION_STRING="Server=myserver;Database=mydb;User Id=myuser;Passwo
     "sqlserver": {
       "type": "stdio",
       "command": "dnx",
-      "args": [
-        "SqlServerMcp",
-        "--version",
-        "1.0.0",
-        "--yes"
-      ],
+      "args": ["SqlServerMcp", "--yes"],
       "env": {
         "SQLSERVER_CONNECTION_STRING": "Server=...;Database=...;User Id=...;Password=...;TrustServerCertificate=True;"
       }
@@ -62,15 +27,126 @@ SQLSERVER_CONNECTION_STRING="Server=myserver;Database=mydb;User Id=myuser;Passwo
 }
 ```
 
-## Building
+## Configuration
 
-The server is compiled as a self-contained Native AOT single-file executable for Windows and Linux:
+### Database connection
 
-- `win-x64`
-- `linux-x64`
-- `linux-musl-x64` (statically linked, no glibc dependency)
+Set the `SQLSERVER_CONNECTION_STRING` environment variable with your connection string:
+
+```
+SQLSERVER_CONNECTION_STRING="Server=myserver;Database=mydb;User Id=myuser;Password=mypassword;TrustServerCertificate=True;"
+```
+
+### MCP client configuration
+
+#### With downloaded binary
+
+```json
+{
+  "servers": {
+    "sqlserver": {
+      "type": "stdio",
+      "command": "./SQLServerMcp",
+      "args": [],
+      "env": {
+        "SQLSERVER_CONNECTION_STRING": "Server=...;Database=...;User Id=...;Password=...;TrustServerCertificate=True;"
+      }
+    }
+  }
+}
+```
+
+#### On Windows
+
+```json
+{
+  "servers": {
+    "sqlserver": {
+      "type": "stdio",
+      "command": ".\\SQLServerMcp.exe",
+      "args": [],
+      "env": {
+        "SQLSERVER_CONNECTION_STRING": "Server=...;Database=...;User Id=...;Password=...;TrustServerCertificate=True;"
+      }
+    }
+  }
+}
+```
+
+## Available tools
+
+### `query` — Read queries
+
+Execute SELECT statements and return results as JSON.
+
+**Parameter:**
+- `query` (string): The SQL SELECT statement to execute
+
+**Example:**
+```sql
+SELECT TOP 10 Name, CreatedDate FROM sys.tables
+```
+
+**Response:**
+```json
+[
+  {"Name": "Users", "CreatedDate": "2024-01-15T10:30:00.000"},
+  {"Name": "Orders", "CreatedDate": "2024-01-15T10:30:00.000"}
+]
+```
+
+### `execute` — Data modification
+
+Execute commands that modify data or structure (INSERT, UPDATE, DELETE, CREATE, ALTER, DROP).
+
+**Parameter:**
+- `query` (string): The SQL statement to execute
+
+**Example:**
+```sql
+INSERT INTO Users (Name, Email) VALUES ('Juan', 'juan@ejemplo.com')
+```
+
+**Response:**
+```
+Rows affected: 1
+```
+
+## Supported data types
+
+The server automatically converts SQL Server types to JSON:
+
+| SQL Server | JSON |
+|---|---|
+| `INT`, `BIGINT`, `SMALLINT` | Number |
+| `FLOAT`, `DECIMAL`, `MONEY` | Number |
+| `VARCHAR`, `NVARCHAR`, `TEXT` | String |
+| `BIT` | Boolean |
+| `DATETIME`, `DATE` | ISO 8601 string |
+| `VARBINARY` | Base64 |
+| `NULL` | `null` |
+
+## Troubleshooting
+
+### Connection error
+- Verify that `SQLSERVER_CONNECTION_STRING` is configured correctly
+- Ensure the SQL Server is accessible from where you run the MCP server
+- For remote connections, add `TrustServerCertificate=True;` if using self-signed certificates
+
+### Long query timeout
+- Queries have a default timeout of 30 seconds
+- For longer queries, optimize your query or add indexes
+
+### Authentication error
+- Verify username and password in the connection string
+- For Windows authentication, use `Integrated Security=True;` instead of User Id/Password
+
+## Supported platforms
+
+- Windows x64
+- Linux x64
+- Linux x64 (musl, statically compiled)
 
 ## More information
 
-- [MCP Official Documentation](https://modelcontextprotocol.io/)
-- [MCP C# SDK](https://csharp.sdk.modelcontextprotocol.io/)
+- [Official MCP Documentation](https://modelcontextprotocol.io/)
