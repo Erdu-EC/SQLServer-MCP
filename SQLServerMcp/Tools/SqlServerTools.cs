@@ -15,12 +15,17 @@ internal class SqlServerTools
 {
     private static string GetConnectionString()
     {
-        var connStr = Environment.GetEnvironmentVariable("SQLSERVER_CONNECTION_STRING");
+        const string variableName = "SQLSERVER_CONNECTION_STRING";
+        var connStr = Environment.GetEnvironmentVariable(variableName);
+
         if (string.IsNullOrWhiteSpace(connStr))
         {
             throw new InvalidOperationException(
-                "SQLSERVER_CONNECTION_STRING environment variable is not set. " +
-                "Example: Server=myserver;Database=mydb;User Id=myuser;Password=mypassword;TrustServerCertificate=True;");
+                $"The {variableName} environment variable is not set or is empty.\n" +
+                "Set it before running the server:\n" +
+                "  Linux/macOS: export SQLSERVER_CONNECTION_STRING=\"Server=...;Database=...;TrustServerCertificate=True;\"\n" +
+                "  Windows CMD:   set SQLSERVER_CONNECTION_STRING=\"Server=...;Database=...;TrustServerCertificate=True;\"\n" +
+                "  Windows PowerShell: $env:SQLSERVER_CONNECTION_STRING=\"Server=...;Database=...;TrustServerCertificate=True;\"");
         }
 
         return connStr;
